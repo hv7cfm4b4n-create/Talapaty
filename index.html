@@ -52,6 +52,7 @@
         .modal-btn {flex: 1;padding: 10px;border: none;border-radius: 8px;font-weight: bold;cursor: pointer;}
         .btn-confirm { background-color: #00a0b0; color: white; }
         .btn-cancel { background-color: #eee; color: #333; }
+        .btn-delete-order { background-color: #dc3545; color: white; padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; margin-top: 10px; width: 100%; }
         .status-badge {padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;}
         .status-pending {background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba;}
         .status-delivered {background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
@@ -108,7 +109,7 @@
                     </div>
                     <span>آخر</span>
                 </div>
-                </div>
+            </div>
 
             <div class="guide-section">
                 <h3>💡 إزاي تطلب؟</h3>
@@ -248,7 +249,6 @@
             localStorage.setItem('userPhone', phone);
             localStorage.setItem('userAddress', address);
 
-            // تسجيل العميل في الداتا بيز إذا لم يكن مسجل
             db.ref('users').orderByChild('phone').equalTo(phone).once('value', snapshot => {
                 if(!snapshot.exists()){
                     db.ref('users').push({
@@ -337,15 +337,22 @@
                 }
                 ordersList.innerHTML = ''; 
                 
-                // الترتيب من الأحدث للأقدم
                 let ordersArray = [];
-                snapshot.forEach((child) => { ordersArray.push(child.val()); });
+                // استخراج الـ ID عشان نقدر نحذف الطلب
+                snapshot.forEach((child) => { 
+                    let orderData = child.val();
+                    orderData.id = child.key; 
+                    ordersArray.push(orderData); 
+                });
                 ordersArray.reverse();
 
                 ordersArray.forEach((order) => {
                     const statusText = order.done ? 'تم التسليم ✅' : 'جاري التجهيز ⏳';
                     const statusClass = order.done ? 'status-delivered' : 'status-pending';
                     const itemsHtml = order.cart.map(item => `• ${item}`).join('<br>');
+                    
+                    // زر الإلغاء يظهر فقط لو الطلب لسه ماتسلمش
+                    const deleteButtonHtml = !order.done ? `<button class="btn-delete-order" onclick="deleteMyOrder('${order.id}')">إلغاء الطلب 🗑️</button>` : '';
 
                     ordersList.innerHTML += `
                         <div class="order-item">
@@ -355,10 +362,22 @@
                             </div>
                             <p style="font-weight: bold; color: #00a0b0;">تفاصيل الطلب:</p>
                             <p style="margin-top: 5px;">${itemsHtml}</p>
+                            ${deleteButtonHtml}
                         </div>
                     `;
                 });
             });
+        }
+
+        // دالة إلغاء الطلب للعميل
+        function deleteMyOrder(orderId) {
+            if(confirm("هل أنت متأكد إنك عايز تلغي الطلب ده؟")) {
+                db.ref('orders/' + orderId).remove().then(() => {
+                    alert("تم إلغاء الطلب بنجاح.");
+                }).catch((error) => {
+                    alert("حصل مشكلة أثناء إلغاء الطلب، يرجى المحاولة مرة أخرى.");
+                });
+            }
         }
 
         function showAccount() {
@@ -371,11 +390,9 @@
             document.getElementById('acc-notes').innerText = localStorage.getItem('userNote') || 'مفيش ملاحظات';
         }
 
-        // جلب المطاعم والأقسام المضافة من الليدر
         function loadDynamicRestaurants() {
             db.ref('restaurants').on('value', (snapshot) => {
                 const container = document.getElementById('categories-container');
-                // الاحتفاظ بالأقسام الأربعة الأساسية وإزالة أي مطاعم قديمة قبل إعادة الرسم
                 const staticHTML = `
                     <div class="category-item" onclick="openRequestModal('سوبر ماركت')">
                         <div class="category-icon"><img src="https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&cs=tinysrgb&w=200" alt="سوبر ماركت"></div><span>سوبر ماركت</span>
@@ -397,8 +414,7 @@
                     snapshot.forEach((child) => {
                         const restId = child.key;
                         const data = child.val();
-                        globalRestaurantsData[restId] = data; // حفظ البيانات محلياً لاستخدامها في المودال
-                        // صورة افتراضية للمطاعم
+                        globalRestaurantsData[restId] = data; 
                         const imgUrl = "https://images.pexels.com/photos/262047/pexels-photo-262047.jpeg?auto=compress&cs=tinysrgb&w=200";
                         
                         container.innerHTML += `
@@ -412,16 +428,14 @@
             });
         }
 
-        // فتح المودال العادي (بدون منيو)
         function openRequestModal(categoryName) {
             currentCategory = categoryName;
             document.getElementById('modal-title').innerText = `طلبات قسم ${categoryName}`;
             document.getElementById('user-needs').value = "";
-            document.getElementById('menu-container').style.display = 'none'; // إخفاء المنيو
+            document.getElementById('menu-container').style.display = 'none'; 
             document.getElementById('request-modal').style.display = 'flex';
         }
 
-        // فتح المودال الخاص بالمطاعم (مع عرض المنيو)
         function openRestaurantModal(restId) {
             const restData = globalRestaurantsData[restId];
             if(!restData) return;
@@ -477,7 +491,7 @@
 
             db.ref('orders').push(orderData);
             closeModal();
-            alert("تم إرسال طلبك بنجاح! الليدر هيتواصل معاك، وتقدر تتابع حالته من قسم (طلباتي)");
+            alert("تم إرسال طلبك بنجاح! الليدر هيتواصل معاك، وتقدر تتابع حالته أو تلغيه من قسم (طلباتي)");
             showOrders();
         }
 
@@ -489,7 +503,7 @@
             if(savedName && savedPhone && savedAddress) {
                 document.getElementById('login-page').style.display = 'none';
                 document.getElementById('main-page').style.display = 'block';
-                loadDynamicRestaurants(); // استدعاء الأقسام
+                loadDynamicRestaurants(); 
             }
         };
 

@@ -179,7 +179,14 @@
 
         let isInitialLoad = true;
         let previousNewOrdersCount = 0;
-        const notificationSound = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+        
+        // صوت تنبيه عالي (ممكن تبدله بأي رابط mp3 لتنبيه أطول وأعلى)
+        const notificationSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+
+        // طلب إذن الإشعارات من المتصفح عند فتح الصفحة
+        if ("Notification" in window) {
+            Notification.requestPermission();
+        }
 
         function switchTab(tabId) {
             document.querySelectorAll('.container-section').forEach(sec => sec.classList.remove('active'));
@@ -203,7 +210,18 @@
         }
 
         function showNotification() {
-            notificationSound.play().catch(err => console.log('Sound blocked'));
+            // تشغيل الصوت
+            notificationSound.play().catch(err => console.log('صلاحية تشغيل الصوت مقفولة من المتصفح. لازم تفاعل المستخدم أولاً.'));
+            
+            // إظهار إشعار النظام (Push Notification)
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("أوردر جديد يابطل! 📦", {
+                    body: "افتح التطبيق في أوردر لسه واصل دلوقتي.",
+                    icon: "https://cdn-icons-png.flaticon.com/512/3500/3500833.png" // أيقونة للإشعار
+                });
+            }
+
+            // إظهار الـ Toast الداخلي
             const toast = document.getElementById("notification-toast");
             toast.className = "show";
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 5000);
@@ -277,7 +295,11 @@
                 document.getElementById('new-orders-count').innerText = newOrders.length;
                 document.getElementById('completed-orders-count').innerText = completedOrders.length;
 
-                if (!isInitialLoad && newOrders.length > previousNewOrdersCount) showNotification();
+                // تفعيل الإشعار في حالة وجود أوردرات جديدة
+                if (!isInitialLoad && newOrders.length > previousNewOrdersCount) {
+                    showNotification();
+                }
+                
                 previousNewOrdersCount = newOrders.length;
                 isInitialLoad = false;
 
@@ -465,7 +487,7 @@
         loadOrders();
         loadPrices();
         loadUsers();
-        loadRestaurants(); // تحميل المطاعم بمجرد الفتح
+        loadRestaurants(); 
     </script>
 </body>
 </html>
