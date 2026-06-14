@@ -57,7 +57,6 @@
         .status-pending {background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba;}
         .status-delivered {background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
         
-        /* تصميم جداول الأسعار والمنيو */
         .price-table, .menu-table {width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px;}
         .price-table th, .menu-table th {background-color: #00a0b0; color: white; padding: 12px; text-align: right;}
         .price-table td, .menu-table td {padding: 12px; border-bottom: 1px solid #eee; color: #333; text-align: right; font-size: 14px;}
@@ -338,7 +337,6 @@
                 ordersList.innerHTML = ''; 
                 
                 let ordersArray = [];
-                // استخراج الـ ID عشان نقدر نحذف الطلب
                 snapshot.forEach((child) => { 
                     let orderData = child.val();
                     orderData.id = child.key; 
@@ -351,7 +349,6 @@
                     const statusClass = order.done ? 'status-delivered' : 'status-pending';
                     const itemsHtml = order.cart.map(item => `• ${item}`).join('<br>');
                     
-                    // زر الإلغاء يظهر فقط لو الطلب لسه ماتسلمش
                     const deleteButtonHtml = !order.done ? `<button class="btn-delete-order" onclick="deleteMyOrder('${order.id}')">إلغاء الطلب 🗑️</button>` : '';
 
                     ordersList.innerHTML += `
@@ -369,7 +366,6 @@
             });
         }
 
-        // دالة إلغاء الطلب للعميل
         function deleteMyOrder(orderId) {
             if(confirm("هل أنت متأكد إنك عايز تلغي الطلب ده؟")) {
                 db.ref('orders/' + orderId).remove().then(() => {
@@ -479,21 +475,54 @@
             }
 
             const currentItem = `[${currentCategory}] ${textTextarea}`;
+            const userName = localStorage.getItem('userName');
+            const userPhone = localStorage.getItem('userPhone');
+            const userAddress = localStorage.getItem('userAddress');
+            const userNote = localStorage.getItem('userNote') || 'لا يوجد';
+            
             const orderData = {
-                name: localStorage.getItem('userName'),
-                phone: localStorage.getItem('userPhone'),
-                address: localStorage.getItem('userAddress'),
-                note: localStorage.getItem('userNote') || '',
+                name: userName,
+                phone: userPhone,
+                address: userAddress,
+                note: userNote,
                 cart: [currentItem],
                 done: false,
                 time: new Date().toLocaleString('ar-EG')
             };
 
+            // حفظ في قاعدة البيانات
             db.ref('orders').push(orderData);
+            
+            // إرسال الإشعار للتليجرام
+            sendTelegramNotification(userName, userPhone, userAddress, currentItem, userNote);
+
             closeModal();
             alert("تم إرسال طلبك بنجاح! الليدر هيتواصل معاك، وتقدر تتابع حالته أو تلغيه من قسم (طلباتي)");
             showOrders();
         }
+
+        // ---------- هنا تحط التوكن والـ ID بتوعك ---------- //
+        function sendTelegramNotification(name, phone, address, item, note) {
+            
+            const botToken = "8983101943:AAEYWRp8PUhioEk8zftQRPKqTusd9yQ23Pk"; // ضَع التوكن الخاص بك بين علامتي التنصيص
+            
+            const chatId = "8436455313"; // ضَع الـ Chat ID الخاص بك بين علامتي التنصيص
+            
+            // تأكد من عدم ترك هذه الحقول فارغة حتى يعمل الإشعار بشكل صحيح
+            if (botToken === "" || chatId === "") {
+                console.log("لم يتم إعداد التوكن أو الـ Chat ID الخاص بتليجرام.");
+                return;
+            }
+
+            const message = `🚨 أوردر جديد يا ليدر! 🚨\n\n👤 العميل: ${name}\n📱 الرقم: ${phone}\n📍 العنوان: ${address}\n\n🛒 الطلب:\n${item}\n\n📝 ملاحظات: ${note}`;
+            
+            const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+            
+            fetch(url)
+                .then(response => console.log("تم الإرسال لتليجرام"))
+                .catch(error => console.error("خطأ:", error));
+        }
+        // ------------------------------------------------ //
 
         window.onload = function() {
             const savedName = localStorage.getItem('userName');
