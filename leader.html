@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم الليدر - استقبال الطلبات</title>
+    <title>لوحة تحكم الليدر - التطوير</title>
     <style>
         * {box-sizing: border-box;margin: 0;padding: 0;font-family: 'Segoe UI', Tahoma, Geneva, sans-serif;}
         body {background: #f0f2f5;padding: 20px;}
@@ -24,8 +24,7 @@
         
         .section-header-flex {display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;}
         
-        .date-divider {background: #e9ecef;color: #333;padding: 10px 15px;border-radius: 8px;font-weight: bold;margin: 25px 0 15px 0;display: flex;align-items: center;font-size: 16px;border-right: 5px solid #00a0b0;box-shadow: 0 1px 3px rgba(0,0,0,0.05);}
-        .date-divider:first-child {margin-top: 0;}
+        .date-divider {background: #e9ecef;color: #333;padding: 10px 15px;border-radius: 8px;font-weight: bold;margin: 25px 0 15px 0;display: flex;align-items: center;font-size: 16px;border-right: 5px solid #00a0b0;}
         
         .order-card {border: 1px solid #ddd;border-radius: 10px;padding: 15px;margin-bottom: 15px;background: #fafafa;}
         .order-card.done-card {border-color: #c3e6cb; background: #f8fff9;}
@@ -43,51 +42,52 @@
         
         .empty-msg {text-align: center;color: #999;padding: 50px 20px;font-size: 18px;}
         
-        .add-price-form {display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;}
-        .add-price-form input {flex: 1; min-width: 150px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; outline: none;}
-        .add-price-form button {padding: 10px 20px; background: #00a0b0; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;}
+        .input-form {display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;}
+        .input-form input {flex: 1; min-width: 150px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; outline: none;}
+        .input-form button {padding: 10px 20px; background: #00a0b0; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;}
         
         .data-table {width: 100%; border-collapse: collapse; margin-top: 10px; text-align: right;}
         .data-table th, .data-table td {padding: 12px; border: 1px solid #eee;}
         .data-table th {background: #f8f9fa;}
         .btn-delete {background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;}
         
-        /* تصميم الإشعار المنبثق (Toast) */
+        /* تنسيق قسم إدارة المطاعم */
+        .restaurant-box {border: 2px solid #00a0b0; border-radius: 10px; padding: 15px; margin-bottom: 20px; background: #fafafa;}
+        .restaurant-box h4 {color: #00a0b0; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;}
+        .menu-table-mini {width: 100%; border-collapse: collapse; margin-bottom: 10px; background: white;}
+        .menu-table-mini th, .menu-table-mini td {border: 1px solid #ddd; padding: 8px; text-align: right; font-size: 14px;}
+        .menu-table-mini th {background: #f1f1f1;}
+        
         #notification-toast {
             visibility: hidden; min-width: 250px; background-color: #28a745; color: #fff;
             text-align: center; border-radius: 8px; padding: 15px 20px; position: fixed;
             z-index: 1000; left: 50%; top: 30px; transform: translateX(-50%);
             font-size: 16px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        #notification-toast.show {
-            visibility: visible;
-            animation: fadein 0.5s, fadeout 0.5s 4.5s;
-        }
+        #notification-toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 4.5s; }
         @keyframes fadein { from {top: 0; opacity: 0;} to {top: 30px; opacity: 1;} }
         @keyframes fadeout { from {top: 30px; opacity: 1;} to {top: 0; opacity: 0;} }
     </style>
 </head>
 <body>
 
-    <!-- رسالة الإشعار المنبثقة -->
     <div id="notification-toast">🔔 جالك أوردر جديد!</div>
 
     <div class="header">
         <div>
             <h2>📦 لوحة تحكم الليدر</h2>
-            <p>إدارة الطلبات والأسعار والعملاء - نجع حمادي</p>
+            <p>إدارة الطلبات والأسعار والمطاعم - نجع حمادي</p>
         </div>
     </div>
 
-    <!-- أزرار التنقل -->
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('new-orders')">الطلبات الجديدة</button>
-        <button class="tab-btn" onclick="switchTab('completed-orders')">الطلبات المكتملة (تم)</button>
-        <button class="tab-btn" onclick="switchTab('users-management')">العملاء (الحسابات)</button>
+        <button class="tab-btn" onclick="switchTab('completed-orders')">الطلبات المكتملة</button>
+        <button class="tab-btn" onclick="switchTab('users-management')">العملاء</button>
         <button class="tab-btn" onclick="switchTab('prices-management')">أسعار التوصيل</button>
+        <button class="tab-btn" style="background:#00a0b0; color:white;" onclick="switchTab('restaurants-management')">المطاعم والمنيو 🍔</button>
     </div>
 
-    <!-- الإحصائيات العامة -->
     <div class="stats" id="stats-section">
         <div class="stat-card">
             <h3 id="new-orders-count">0</h3>
@@ -99,29 +99,22 @@
         </div>
     </div>
 
-    <!-- قسم الطلبات الجديدة -->
     <div class="container-section active" id="new-orders">
         <div class="section-header-flex">
             <h3 style="color:#ff5e00;">الطلبات قيد التجهيز</h3>
             <button class="btn-delete" style="padding: 8px 15px; font-weight: bold;" onclick="deleteAllOrders(false)">🗑️ مسح كل الطلبات الجديدة</button>
         </div>
-        <div id="new-orders-list">
-            <div class="empty-msg">جاري التحميل...</div>
-        </div>
+        <div id="new-orders-list"><div class="empty-msg">جاري التحميل...</div></div>
     </div>
 
-    <!-- قسم الطلبات المكتملة -->
     <div class="container-section" id="completed-orders">
         <div class="section-header-flex">
             <h3 style="color:#28a745;">أرشيف الطلبات المسلمة</h3>
             <button class="btn-delete" style="padding: 8px 15px; font-weight: bold;" onclick="deleteAllOrders(true)">🗑️ مسح كل الطلبات المكتملة</button>
         </div>
-        <div id="completed-orders-list">
-            <div class="empty-msg">جاري التحميل...</div>
-        </div>
+        <div id="completed-orders-list"><div class="empty-msg">جاري التحميل...</div></div>
     </div>
 
-    <!-- قسم إدارة العملاء (الجديد) -->
     <div class="container-section" id="users-management">
         <div class="section-header-flex">
             <h3 style="color:#00a0b0;">العملاء المسجلين في التطبيق</h3>
@@ -131,14 +124,7 @@
         </div>
         <div style="overflow-x: auto;">
             <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>الاسم</th>
-                        <th>رقم الهاتف</th>
-                        <th>العنوان</th>
-                        <th>تاريخ التسجيل</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>الاسم</th><th>رقم الهاتف</th><th>العنوان</th><th>تاريخ التسجيل</th></tr></thead>
                 <tbody id="users-table-body">
                     <tr><td colspan="4" class="empty-msg">جاري تحميل الحسابات...</td></tr>
                 </tbody>
@@ -146,60 +132,62 @@
         </div>
     </div>
 
-    <!-- قسم إدارة الأسعار -->
     <div class="container-section" id="prices-management">
         <h3 style="margin-bottom: 15px;">إضافة منطقة وسعر توصيل</h3>
-        <div class="add-price-form">
+        <div class="input-form">
             <input type="text" id="loc-input" placeholder="اسم المنطقة / المكان" required>
             <input type="number" id="price-input" placeholder="السعر (جنيه)" required>
             <button onclick="addPrice()">➕ إضافة للقائمة</button>
         </div>
         <table class="data-table">
-            <thead>
-                <tr>
-                    <th>المكان / المنطقة</th>
-                    <th>سعر التوصيل</th>
-                    <th>حذف</th>
-                </tr>
-            </thead>
+            <thead><tr><th>المكان / المنطقة</th><th>سعر التوصيل</th><th>حذف</th></tr></thead>
             <tbody id="prices-table-body">
                 <tr><td colspan="3" class="empty-msg">جاري تحميل الأسعار...</td></tr>
             </tbody>
         </table>
     </div>
 
-    <!-- Firebase -->
+    <div class="container-section" id="restaurants-management">
+        <h3 style="margin-bottom: 15px;">إضافة قسم أو مطعم جديد لصفحة العميل</h3>
+        <div class="input-form">
+            <input type="text" id="rest-name-input" placeholder="اسم المطعم (مثال: كشري التحرير، صيدلية العزبي...)" required>
+            <button onclick="addRestaurant()">➕ إنشاء المطعم</button>
+        </div>
+        
+        <h3 style="margin: 25px 0 15px; color:#333; border-bottom: 2px solid #ddd; padding-bottom: 10px;">المطاعم الحالية (إضافة وتعديل المنيو)</h3>
+        <div id="restaurants-list">
+            <div class="empty-msg">جاري تحميل المطاعم...</div>
+        </div>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <script>
         const firebaseConfig = {
-          apiKey: "AIzaSyDr6jzewfcVvF7EpQ0J_sZwBYt-55iLu1Q",
-          authDomain: "talabat-nagahammadi.firebaseapp.com",
-          databaseURL: "https://talabat-nagahammadi-default-rtdb.firebaseio.com",
-          projectId: "talabat-nagahammadi",
-          storageBucket: "talabat-nagahammadi.firebasestorage.app",
-          messagingSenderId: "692271626306",
-          appId: "1:692271626306:web:17c31b4bebd1a91d5fd5db"
+            apiKey: "AIzaSyDr6jzewfcVvF7EpQ0J_sZwBYt-55iLu1Q",
+            authDomain: "talabat-nagahammadi.firebaseapp.com",
+            databaseURL: "https://talabat-nagahammadi-default-rtdb.firebaseio.com",
+            projectId: "talabat-nagahammadi",
+            storageBucket: "talabat-nagahammadi.firebasestorage.app",
+            messagingSenderId: "692271626306",
+            appId: "1:692271626306:web:17c31b4bebd1a91d5fd5db"
         };
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // متغيرات للإشعارات
         let isInitialLoad = true;
         let previousNewOrdersCount = 0;
-        // رابط لصوت إشعار لطيف
         const notificationSound = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
 
         function switchTab(tabId) {
             document.querySelectorAll('.container-section').forEach(sec => sec.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            
             document.getElementById(tabId).classList.add('active');
             event.target.classList.add('active');
-
-            if(tabId === 'prices-management' || tabId === 'users-management'){
+            
+            if(tabId === 'prices-management' || tabId === 'users-management' || tabId === 'restaurants-management'){
                 document.getElementById('stats-section').style.display = 'none';
             } else {
                 document.getElementById('stats-section').style.display = 'grid';
@@ -215,21 +203,19 @@
         }
 
         function showNotification() {
-            // تشغيل الصوت
-            notificationSound.play().catch(err => console.log('Browser blocked autoplay sound'));
-            // إظهار الرسالة
+            notificationSound.play().catch(err => console.log('Sound blocked'));
             const toast = document.getElementById("notification-toast");
             toast.className = "show";
-            setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 5000);
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 5000);
         }
 
+        // ------------------ دوال الطلبات ------------------
         function renderGroupedOrders(ordersArray, containerId, isDone) {
             const container = document.getElementById(containerId);
             if(ordersArray.length === 0) {
                 container.innerHTML = `<div class="empty-msg">مفيش طلبات ${isDone ? 'مسلمة' : 'جديدة'} حالياً 📭</div>`;
                 return;
             }
-            ordersArray.reverse();
             const groupedOrders = {};
             ordersArray.forEach(order => {
                 const dateKey = extractDate(order.time);
@@ -242,19 +228,15 @@
                 container.innerHTML += `<div class="date-divider">📅 أوردرات يوم: ${date}</div>`;
                 groupedOrders[date].forEach(order => {
                     const itemsHTML = order.cart ? order.cart.map(item => `• ${item}`).join('<br>') : 'مفيش طلبات';
-                    let actionsHtml = '';
-                    if(!isDone) {
-                        actionsHtml = `
+                    let actionsHtml = isDone ? 
+                        `<button class="btn btn-delete-order" onclick="deleteOrder('${order.id}')">🗑️ مسح من السجل</button>` :
+                        `
                             <button class="btn btn-call" onclick="callPhone('${order.phone}')">📞 اتصال</button>
                             <button class="btn btn-whatsapp" onclick="openWhatsApp('${order.phone}')">💬 واتساب</button>
                             <button class="btn btn-done" onclick="markDone('${order.id}')">✅ تم التسليم</button>
                             <button class="btn btn-delete-order" onclick="deleteOrder('${order.id}')">🗑️ حذف</button>
                         `;
-                    } else {
-                        actionsHtml = `
-                            <button class="btn btn-delete-order" onclick="deleteOrder('${order.id}')">🗑️ مسح من السجل</button>
-                        `;
-                    }
+
                     container.innerHTML += `
                         <div class="order-card ${isDone ? 'done-card' : ''}">
                             <div class="order-header">
@@ -281,81 +263,69 @@
             db.ref('orders').on('value', snapshot => {
                 const newOrders = [];
                 const completedOrders = [];
-                
                 snapshot.forEach(child => {
                     const order = child.val();
                     order.id = child.key;
                     if(order.done) completedOrders.push(order);
                     else newOrders.push(order);
                 });
+                
+                // عكس المصفوفات لعرض الأحدث فوق
+                newOrders.reverse();
+                completedOrders.reverse();
 
                 document.getElementById('new-orders-count').innerText = newOrders.length;
                 document.getElementById('completed-orders-count').innerText = completedOrders.length;
 
-                // نظام الإشعارات للطلبات الجديدة
-                if (!isInitialLoad && newOrders.length > previousNewOrdersCount) {
-                    showNotification(); // استدعاء الإشعار
-                }
+                if (!isInitialLoad && newOrders.length > previousNewOrdersCount) showNotification();
                 previousNewOrdersCount = newOrders.length;
-                isInitialLoad = false; // تم انتهاء التحميل الأول
+                isInitialLoad = false;
 
                 renderGroupedOrders(newOrders, 'new-orders-list', false);
                 renderGroupedOrders(completedOrders, 'completed-orders-list', true);
             });
         }
 
-        // --- الدالة الجديدة لتحميل الحسابات (العملاء) ---
+        function markDone(orderId) {
+            if(confirm('هل تم تسليم هذا الطلب بنجاح للعميل؟')) db.ref('orders/' + orderId).update({done: true});
+        }
+
+        function deleteOrder(orderId) {
+            if(confirm('تأكيد الحذف نهائياً؟')) db.ref('orders/' + orderId).remove();
+        }
+
+        function deleteAllOrders(isDone) {
+            let msg = isDone ? 'مسح الأرشيف نهائياً؟' : 'مسح الطلبات الجديدة نهائياً؟';
+            if(confirm(msg)) {
+                db.ref('orders').once('value', snapshot => {
+                    let updates = {};
+                    snapshot.forEach(child => { if (!!child.val().done === isDone) updates[child.key] = null; });
+                    db.ref('orders').update(updates);
+                });
+            }
+        }
+
+        // ------------------ إدارة الأسعار والعملاء ------------------
         function loadUsers() {
             db.ref('users').on('value', snapshot => {
                 const tbody = document.getElementById('users-table-body');
                 const usersCount = document.getElementById('total-users-count');
-                
                 if (!snapshot.exists()) {
                     usersCount.innerText = '0';
-                    tbody.innerHTML = '<tr><td colspan="4" class="empty-msg">لم يسجل أحد في التطبيق بعد</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="4" class="empty-msg">لم يسجل أحد بعد</td></tr>';
                     return;
                 }
-
                 usersCount.innerText = snapshot.numChildren();
                 tbody.innerHTML = '';
-                
                 snapshot.forEach(child => {
                     const user = child.val();
-                    tbody.innerHTML += `
-                        <tr>
-                            <td style="font-weight:bold; color:#00a0b0;">${user.name || '-'}</td>
-                            <td>${user.phone || '-'}</td>
-                            <td>${user.address || '-'}</td>
-                            <td style="font-size: 13px; color:#666;">${user.registerTime || 'غير مسجل'}</td>
-                        </tr>
-                    `;
+                    tbody.innerHTML += `<tr>
+                        <td style="font-weight:bold; color:#00a0b0;">${user.name || '-'}</td>
+                        <td>${user.phone || '-'}</td><td>${user.address || '-'}</td>
+                        <td style="font-size: 13px; color:#666;">${user.registerTime || 'غير مسجل'}</td>
+                    </tr>`;
                 });
             });
-        }
-
-        function markDone(orderId) {
-            if(confirm('هل تم تسليم هذا الطلب بنجاح للعميل؟ سيتم نقله للطلبات المكتملة.')) {
-                db.ref('orders/' + orderId).update({done: true});
-            }
-        }
-
-        function deleteOrder(orderId) {
-            if(confirm('هل أنت متأكد من حذف هذا الطلب نهائياً من قاعدة البيانات؟')) {
-                db.ref('orders/' + orderId).remove();
-            }
-        }
-
-        function deleteAllOrders(isDone) {
-            let msg = isDone ? 'هل أنت متأكد من مسح جميع الطلبات المكتملة نهائياً من الأرشيف؟' : 'هل أنت متأكد من مسح جميع الطلبات الجديدة نهائياً؟';
-            if(confirm(msg)) {
-                db.ref('orders').once('value', snapshot => {
-                    let updates = {};
-                    snapshot.forEach(child => {
-                        if (!!child.val().done === isDone) updates[child.key] = null;
-                    });
-                    db.ref('orders').update(updates);
-                });
-            }
         }
 
         function loadPrices() {
@@ -368,13 +338,10 @@
                 tableBody.innerHTML = '';
                 snapshot.forEach(child => {
                     const data = child.val();
-                    tableBody.innerHTML += `
-                        <tr>
-                            <td>${data.location}</td>
-                            <td style="font-weight:bold; color:#00a0b0;">${data.price} جنيه</td>
-                            <td><button class="btn-delete" onclick="deletePrice('${child.key}')">حذف 🗑️</button></td>
-                        </tr>
-                    `;
+                    tableBody.innerHTML += `<tr>
+                        <td>${data.location}</td><td style="font-weight:bold; color:#00a0b0;">${data.price} جنيه</td>
+                        <td><button class="btn-delete" onclick="deletePrice('${child.key}')">حذف 🗑️</button></td>
+                    </tr>`;
                 });
             });
         }
@@ -382,33 +349,123 @@
         function addPrice() {
             const loc = document.getElementById('loc-input').value;
             const price = document.getElementById('price-input').value;
-            if(loc.trim() === '' || price.trim() === '') return alert('الرجاء كتابة اسم المكان والسعر!');
+            if(loc.trim() === '' || price.trim() === '') return alert('اكتب البيانات المطلوبة!');
             db.ref('delivery_prices').push({location: loc, price: price});
-            document.getElementById('loc-input').value = '';
-            document.getElementById('price-input').value = '';
+            document.getElementById('loc-input').value = ''; document.getElementById('price-input').value = '';
+        }
+        function deletePrice(id) { if(confirm('حذف المنطقة؟')) db.ref('delivery_prices/' + id).remove(); }
+
+
+        // ------------------ دوال إدارة المطاعم والمنيو ------------------
+
+        function loadRestaurants() {
+            db.ref('restaurants').on('value', snapshot => {
+                const container = document.getElementById('restaurants-list');
+                if(!snapshot.exists()){
+                    container.innerHTML = '<div class="empty-msg">مفيش مطاعم مضافة حالياً. أنشئ مطعم من فوق 👆</div>';
+                    return;
+                }
+                container.innerHTML = '';
+                
+                snapshot.forEach(child => {
+                    const restId = child.key;
+                    const data = child.val();
+                    
+                    // استخراج أصناف المنيو إن وجدت
+                    let menuHTML = '';
+                    if(data.menu) {
+                        for(let menuKey in data.menu) {
+                            menuHTML += `
+                                <tr>
+                                    <td>${data.menu[menuKey].name}</td>
+                                    <td>${data.menu[menuKey].price} جنيه</td>
+                                    <td style="text-align:center;"><button class="btn-delete" style="padding: 3px 8px; font-size:12px;" onclick="deleteMenuItem('${restId}', '${menuKey}')">حذف</button></td>
+                                </tr>
+                            `;
+                        }
+                    } else {
+                        menuHTML = `<tr><td colspan="3" style="text-align:center; color:#999;">المنيو فاضي.. ضيف أصناف تحت</td></tr>`;
+                    }
+
+                    container.innerHTML += `
+                        <div class="restaurant-box">
+                            <h4>
+                                <span>🍽️ ${data.name}</span>
+                                <button class="btn-delete" onclick="deleteRestaurant('${restId}')">مسح المطعم بالكامل 🗑️</button>
+                            </h4>
+                            
+                            <table class="menu-table-mini">
+                                <thead><tr><th>اسم الصنف</th><th>السعر</th><th style="width: 60px; text-align:center;">إجراء</th></tr></thead>
+                                <tbody>${menuHTML}</tbody>
+                            </table>
+                            
+                            <div class="input-form" style="margin-bottom:0; background:#fff; padding:10px; border-radius:8px;">
+                                <input type="text" id="item-name-${restId}" placeholder="اسم الصنف (مثال: شاورما فراخ)">
+                                <input type="number" id="item-price-${restId}" placeholder="السعر" style="max-width:120px;">
+                                <button onclick="addMenuItem('${restId}')">إضافة للمنيو ➕</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
         }
 
-        function deletePrice(id) {
-            if(confirm('متأكد إنك عايز تحذف المكان ده من القائمة؟')) db.ref('delivery_prices/' + id).remove();
+        // إضافة مطعم جديد
+        function addRestaurant() {
+            const name = document.getElementById('rest-name-input').value;
+            if(name.trim() === '') return alert('يرجى كتابة اسم المطعم أولاً!');
+            db.ref('restaurants').push({name: name});
+            document.getElementById('rest-name-input').value = '';
+            alert('تمت إضافة المطعم بنجاح! وتقدر تضيفله الأصناف دلوقتي.');
         }
 
+        // حذف مطعم بالكامل
+        function deleteRestaurant(restId) {
+            if(confirm('متأكد إنك عايز تحذف المطعم ده بكل الأصناف اللي جواه من صفحة العميل؟')) {
+                db.ref('restaurants/' + restId).remove();
+            }
+        }
+
+        // إضافة صنف لمنيو مطعم معين
+        function addMenuItem(restId) {
+            const itemName = document.getElementById(`item-name-${restId}`).value;
+            const itemPrice = document.getElementById(`item-price-${restId}`).value;
+            
+            if(itemName.trim() === '' || itemPrice.trim() === '') {
+                return alert('يرجى كتابة اسم الصنف والسعر!');
+            }
+            
+            db.ref(`restaurants/${restId}/menu`).push({
+                name: itemName,
+                price: itemPrice
+            });
+        }
+
+        // حذف صنف من المنيو
+        function deleteMenuItem(restId, menuId) {
+            if(confirm('حذف هذا الصنف من المنيو؟')) {
+                db.ref(`restaurants/${restId}/menu/${menuId}`).remove();
+            }
+        }
+
+
+        // ------------------ دوال الاتصال ------------------
         function callPhone(phone) {
-            if(!phone) return alert('مفيش رقم موبايل');
+            if(!phone) return;
             window.location.href = 'tel:' + phone.replace(/\D/g, '');
         }
-
         function openWhatsApp(phone) {
-            if(!phone) return alert('مفيش رقم موبايل');
+            if(!phone) return;
             let cleanPhone = phone.replace(/\D/g, '');
             if(cleanPhone.startsWith('0')) cleanPhone = '20' + cleanPhone.substring(1);
             else if(cleanPhone.startsWith('1') && cleanPhone.length == 10) cleanPhone = '20' + cleanPhone;
             window.open(`https://wa.me/${cleanPhone}`, '_blank');
         }
 
-        // تشغيل الدوال عند الفتح (أضفنا دالة loadUsers)
         loadOrders();
         loadPrices();
         loadUsers();
+        loadRestaurants(); // تحميل المطاعم بمجرد الفتح
     </script>
 </body>
 </html>
